@@ -14,9 +14,21 @@ data "aws_ami" "app_ami" {
   owners = ["amazon"]
 }
 
+data "aws_ec2_instance_type_offerings" "free_tier" {
+  filter {
+    name   = "free-tier-eligible"
+    values = ["true"]
+  }
+
+  filter {
+    name   = "instance-type"
+    values = ["t3.micro", "t2.micro", "t4g.micro"]
+  }
+}
+
 resource "aws_instance" "web" {
   ami           = data.aws_ami.app_ami.id
-  instance_type = "t2.micro"
+  instance_type = data.aws_ec2_instance_type_offerings.free_tier.instance_types[0]
 
   tags = {
     Name = "HelloWorld"
